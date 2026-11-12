@@ -1,0 +1,432 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment Fault Report</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <div class="grey-bar">
+        <h3>Test</h3>
+        <p>Estimated time to complete this form: 5 minutes</p>
+    </div>
+
+    <div class="form-container">
+
+        <form id="equipmentForm" novalidate>
+
+            <!-- 1. Equipment Name -->
+            <div class="form-group">
+                <label for="equipmentTest">1. Equipment Name</label>
+
+                <ul class="instruction-list">
+                    <li>Start typing an equipment name</li>
+                    <li>If the equipment is not found, select an option below.</li>
+                </ul>
+
+                <select id="equipmentTest" name="equipmentName" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="Test 1">Test 1</option>
+                    <option value="Test 2">Test 2</option>
+                    <option value="Test 3">Test 3</option>
+                    <option value="Test 4">Test 4</option>
+                    <option value="Test 5">Test 5</option>
+                </select>
+
+                <small class="required-message">Please fill out this field.</small>
+            </div>
+
+
+            <!-- 2. Equipment Serial Number -->
+            <div class="form-group">
+                <label for="serialNumber">2. Equipment Serial Number</label>
+
+                <ul class="instruction-list">
+                    <li>Key NA if it is not applicable</li>
+                    <li>For equipment with serial number</li>
+                </ul>
+
+                <input type="text"
+                       id="serialNumber"
+                       name="serialNumber"
+                       placeholder="Enter equipment serial number">
+            </div>
+
+
+            <!-- 3. Material Number -->
+            <div class="form-group">
+                <label for="materialNumber">3. Material Number</label>
+
+                <ul class="instruction-list">
+                    <li>To indicate the 6 or 3</li>
+                    <li>Key NA if it is not applicable</li>
+                </ul>
+
+                <input type="text"
+                       id="materialNumber"
+                       name="materialNumber"
+                       placeholder="Enter material number">
+            </div>
+
+
+            <!-- 4. Fixed Asset ID -->
+            <div class="form-group">
+                <label for="fixedAsset">4. Fixed Asset ID</label>
+
+                <ul class="instruction-list">
+                    <li>Key in NA if it is not applicable</li>
+                </ul>
+
+                <input type="text"
+                       id="fixedAsset"
+                       name="fixedAsset"
+                       placeholder="Enter Fixed Asset ID or NA"
+                       required>
+
+                <small class="required-message">Please fill out this field.</small>
+            </div>
+
+
+            <!-- 5. AS ID -->
+            <div class="form-group">
+                <label for="atsID">5. AS ID</label>
+
+                <ul class="instruction-list">
+                    <li>Key in NA if it is not applicable</li>
+                    <li>For equipment with ATS ID, failure to indicate will be rejected.</li>
+                </ul>
+
+                <input type="text"
+                       id="atsID"
+                       name="atsID"
+                       placeholder="Enter ATS ID or NA"
+                       required>
+
+                <small class="required-message">Please fill out this field.</small>
+            </div>
+
+
+            <!-- 6. NSF ID -->
+            <div class="form-group">
+                <label for="nsfID">6. NSF ID</label>
+
+                <ul class="instruction-list">
+                    <li>Key in NA if it is not applicable</li>
+                </ul>
+
+                <input type="text"
+                       id="nsfID"
+                       name="nsfID"
+                       placeholder="Enter NSF ID or NA">
+            </div>
+
+
+            <!-- 7. STO Number -->
+            <div class="form-group">
+                <label for="stoNumber">7. STO Number</label>
+
+                <ul class="instruction-list">
+                    <li>For STL use only.</li>
+                </ul>
+
+                <input type="text"
+                       id="stoNumber"
+                       name="stoNumber"
+                       placeholder="Enter STO Number">
+            </div>
+
+
+            <!-- 8. IS Number -->
+            <div class="form-group">
+                <label for="isNumber">8. IS Number</label>
+
+                <ul class="instruction-list">
+                    <li>For STL use only.</li>
+                </ul>
+
+                <input type="text"
+                       id="isNumber"
+                       name="isNumber"
+                       placeholder="Enter IS Number">
+            </div>
+
+
+            <!-- 9. Fault Description -->
+            <div class="form-group">
+                <label for="faultDescription">9. Fault Description</label>
+
+                <ul class="instruction-list">
+                    <li>
+                        Please provide DETAILED description of equipment faults and/or damages.
+                    </li>
+
+                    <li>
+                        Example:<br>
+                        The chainsaw can start but cannot idle. Revving the engine does not help.
+                        There is enough fuel in the tank.
+                    </li>
+
+                    <li>
+                        Keywords you can use:<br>
+                        Unable To Start, Chain Jammed, Recoil Starter Faulty, Trigger Faulty,
+                        Throttle Faulty, Engine No Power, Engine Stalling, Loose Belt,
+                        Fuel Tank Leak, Starter Rope Snap, No Display/Image On Screen,
+                        Switch Faulty, Battery Faulty, Loose Connection, Tank Leak,
+                        Unable To Couple, Unable To On, Unable To Analyze,
+                        Battery Cannot Turn On, Self-Test Fail, Screen Crack,
+                        Front Panel Faulty, Body Crack, Missing Screw, Buckle Strap Faulty,
+                        Lever Faulty, Leaking, Calibration, Blurred Screen, No Connection,
+                        Maintenance Error, Clutch Faulty, Steering Faulty, Gear Cannot Engage,
+                        Printer Faulty, Unable To Charge, Unable To Convert, Torn Cushion,
+                        Wheel Jammed, Cylinder Jammed, Hydrotest.
+                    </li>
+                </ul>
+
+                <textarea id="faultDescription"
+                          name="faultDescription"
+                          rows="5"
+                          placeholder="Describe the equipment fault or damage..."
+                          required></textarea>
+
+                <small class="required-message">Please fill out this field.</small>
+            </div>
+
+
+            <!-- 10. Photos / Videos Attachment -->
+            <div class="form-group">
+                <label>10. Attachment: Photos/Videos to Show Fault (Optional)</label>
+
+                <ul class="instruction-list">
+                    <li>Please attach photos and/or videos to show fault, if any.</li>
+                </ul>
+
+                <label for="faultFiles" class="upload-box">
+                    <span class="upload-icon">📎</span>
+                    <strong>Choose file or drag and drop here</strong>
+                    <small>Photos and videos</small>
+
+                    <input type="file"
+                           id="faultFiles"
+                           name="faultFiles"
+                           accept="image/*,video/*"
+                           multiple>
+                </label>
+
+                <small class="file-limit">Maximum file size: 10 MB per file</small>
+                <div id="faultFileList" class="file-list"></div>
+            </div>
+
+
+            <!-- 11. L&D Attachment -->
+            <div class="form-group">
+                <label>11. Attachment: L&D (Optional)</label>
+
+                <ul class="instruction-list">
+                    <li>Please attach Lost and Damage.</li>
+                </ul>
+
+                <label for="ldFiles" class="upload-box">
+                    <span class="upload-icon">📎</span>
+                    <strong>Choose file or drag and drop here</strong>
+                    <small>Images or documents</small>
+
+                    <input type="file"
+                           id="ldFiles"
+                           name="ldFiles"
+                           accept="image/*,.pdf,.doc,.docx"
+                           multiple>
+                </label>
+
+                <small class="file-limit">Maximum file size: 10 MB per file</small>
+                <div id="ldFileList" class="file-list"></div>
+            </div>
+
+
+            <!-- 12. Name -->
+            <div class="form-group">
+                <label for="name">12. Name</label>
+
+                <ul class="instruction-list">
+                    <li>Please indicate your name</li>
+                </ul>
+
+                <input type="text"
+                       id="name"
+                       name="name"
+                       placeholder="Enter your name">
+            </div>
+
+
+            <!-- 13. Division -->
+            <div class="form-group">
+                <label for="division">13. Division</label>
+
+                <select id="division" name="division" required>
+                    <option value="" disabled selected>Select an option</option>
+                    <option value="Test 1">Test 1</option>
+                    <option value="Test 2">Test 2</option>
+                    <option value="Test 3">Test 3</option>
+                    <option value="Test 4">Test 4</option>
+                    <option value="Test 5">Test 5</option>
+                </select>
+
+                <small class="required-message">Please fill out this field.</small>
+            </div>
+
+
+            <!-- 14. Email -->
+            <div class="form-group">
+                <label for="email">14. Email</label>
+
+                <ul class="instruction-list">
+                    <li>Kindly indicate email</li>
+                </ul>
+
+                <input type="email"
+                       id="email"
+                       name="email"
+                       placeholder="Enter your email address">
+            </div>
+
+
+            <!-- 15. Contact Number -->
+            <div class="form-group">
+                <label for="contactNumber">15. Contact Number</label>
+
+                <ul class="instruction-list">
+                    <li>This allows us to contact you if further information is required.</li>
+                </ul>
+
+                <input type="tel"
+                       id="contactNumber"
+                       name="contactNumber"
+                       placeholder="Enter your contact number"
+                       required>
+
+                <small class="required-message">Please fill out this field.</small>
+            </div>
+
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn">
+                Submit Form
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <script>
+
+        // Required field validation
+        const form = document.getElementById("equipmentForm");
+
+        const requiredFields = [
+            "equipmentTest",
+            "fixedAsset",
+            "atsID",
+            "faultDescription",
+            "division",
+            "contactNumber"
+        ];
+
+        // Get the error message for each required field
+        function getRequiredMessage(field) {
+            return field.parentElement.querySelector(".required-message");
+        }
+
+        // Initially hide all required messages
+        requiredFields.forEach(id => {
+            const field = document.getElementById(id);
+            const message = getRequiredMessage(field);
+
+            message.style.display = "none";
+
+            function updateMessage() {
+                if (field.value.trim() !== "") {
+                    message.style.display = "none";
+                }
+            }
+
+            field.addEventListener("input", updateMessage);
+            field.addEventListener("change", updateMessage);
+        });
+
+
+        // Validate form when submitted
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let isValid = true;
+            let firstInvalidField = null;
+
+            requiredFields.forEach(id => {
+                const field = document.getElementById(id);
+                const message = getRequiredMessage(field);
+
+                if (field.value.trim() === "") {
+                    message.style.display = "block";
+                    isValid = false;
+
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                } else {
+                    message.style.display = "none";
+                }
+            });
+
+            if (!isValid) {
+                firstInvalidField.focus();
+                return;
+            }
+
+            alert("Form submitted successfully! (Demo only)");
+        });
+
+
+        // Check uploaded file sizes
+        function checkFiles(inputId, listId) {
+            const input = document.getElementById(inputId);
+            const list = document.getElementById(listId);
+
+            input.addEventListener("change", function() {
+                list.innerHTML = "";
+
+                const maxSize = 10 * 1024 * 1024;
+                let valid = true;
+
+                Array.from(input.files).forEach(file => {
+                    if (file.size > maxSize) {
+                        alert(file.name + " exceeds the 10 MB limit.");
+                        valid = false;
+                    }
+                });
+
+                if (!valid) {
+                    input.value = "";
+                    return;
+                }
+
+                Array.from(input.files).forEach(file => {
+                    const item = document.createElement("p");
+                    item.textContent = "✓ " + file.name;
+                    list.appendChild(item);
+                });
+            });
+        }
+
+        checkFiles("faultFiles", "faultFileList");
+        checkFiles("ldFiles", "ldFileList");
+
+    </script>
+
+</body>
+</html>
