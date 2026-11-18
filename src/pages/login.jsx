@@ -40,13 +40,16 @@ export default function Login() {
       localStorage.removeItem("logsyncUser");
       sessionStorage.removeItem("logsyncUser");
 
+      // The server's session token. js/api.js reads it from sessionStorage.
+      sessionStorage.setItem("token", data.token);
+
       if (remember) {
         localStorage.setItem("logsyncUser", userData);
       } else {
         sessionStorage.setItem("logsyncUser", userData);
       }
 
-      alert(`Welcome, ${data.user.username}!`);
+      // alert(`Welcome, ${data.user.username}!`);
 
       console.log("Logged-in user:", data.user);
 

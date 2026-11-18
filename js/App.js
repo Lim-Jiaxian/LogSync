@@ -1,71 +1,47 @@
 import { useState, useEffect, createElement } from 'react';
 import htm from 'htm';
-import { SEED } from './data.js';
+import { api, getToken, logout } from './api.js';
 const html = htm.bind(createElement);
 const STATUSES=['ON_APPLIANCE','STORE','SERVICING','LOANED_OUT','MISSING','OTHER'];
 const RESULTS=['OK','MISSING','FAULTY','QTY_MISMATCH'];
 const lbl=s=>s.replace(/_/g,' ').toLowerCase().replace(/^./,c=>c.toUpperCase());
-const now=()=>new Date().toISOString().slice(0,16).replace('T',' ');
-// One known reference day (from 08:00 onwards). Every other time is calculated from it.
-const ROTA_ANCHOR = { date: '2026-11-18', rota: 3 };
-const ROTA_COUNT = 3;
-const HANDOVER_HOUR = 8; // the duty day changes over at 08:00
-
-// Rotas run 3, 2, 1, 3, 2, 1... one duty day = 08:00 to 08:00
-// 18/11 before 08:00 = R1, from 08:00 = R3 | 19/11 before 08:00 = R3, from 08:00 = R2
-const rotaOn = (when = new Date()) => {
-  // Shift back by the handover hour so 00:00-07:59 still counts as the previous duty day
-  const shifted = new Date(when.getTime() - HANDOVER_HOUR * 36e5);
-  const [y, m, d] = ROTA_ANCHOR.date.split('-').map(Number);
-  const anchor = Date.UTC(y, m - 1, d);
-  const today = Date.UTC(shifted.getFullYear(), shifted.getMonth(), shifted.getDate());
-  const days = Math.round((today - anchor) / 864e5);
-  return ((ROTA_ANCHOR.rota - 1 - days) % ROTA_COUNT + ROTA_COUNT) % ROTA_COUNT + 1;
-};
-const rotaToday = () => rotaOn();
 
 
 function App(){
- const [db,setDb]=useState(SEED);
- const [uid,setUid]=useState(null);
+ const [db,setDb]=useState(null);
  const [tab,setTab]=useState('armoury');
  const [toast,setToast]=useState('');
- const [duty,setDuty]=useState(rotaToday());
- const user=db.users.find(u=>u.user_id===uid);
+ const [error,setError]=useState('');
+ const load=()=>api('/api/data').then(setDb).catch(e=>setError(e.message));
+ useEffect(()=>{ if(!getToken()){window.location.href='/';return} load(); },[]);
  useEffect(()=>{if(toast){const t=setTimeout(()=>setToast(''),2600);return()=>clearTimeout(t)}},[toast]);
- const up=fn=>setDb(d=>fn(structuredClone(d)));
  const notify=m=>setToast(m);
+ // Send a change to the server, reload the data, show a message. Returns true if it worked.
+ const run=async(fn,ok)=>{
+  try{await fn();await load();notify(ok);return true}
+  catch(e){notify(e.message);return false}
+ };
 
- if(!user) return html`<div class="wrap"><div class="who">
-  <h1>Station armoury</h1>
-  <p class="mute">Choose a sample account. In production this is replaced by Singpass sign-in.</p>
-  ${db.users.map(u=>html`<button key=${u.user_id} onClick=${()=>{setUid(u.user_id);setTab('armoury')}}>
-   <span><b>${u.username}</b><br/><span class="mute">${db.stations.find(s=>s.id===u.station_id).name}</span></span>
-   <span class="mute">Rota ${u.rota}</span></button>`)}
- </div></div>`;
+ if(error) return html`<div class="wrap"><p role="alert">${error}</p><button onClick=${logout}>Back to login</button></div>`;
+ if(!db) return html`<div class="wrap"><p class="mute">Loading…</p></div>`;
 
- const station=db.stations.find(s=>s.id===user.station_id);
- const onDuty=user.rota===duty;
+ const user=db.me;
+ const station=db.stations[0];
+ const onDuty=user.rota===db.dutyRota;
  const tabs=[['armoury','Armoury'],['tracker','Equipment & log']];
  if(user.role!=='FF') tabs.push(['service','Send for servicing']);
  if(user.role==='IC') tabs.push(['init','Add equipment']);
- const ctx={db,up,user,station,onDuty,notify};
+ const ctx={db,run,user,station,onDuty};
 
  return html`<div>
   <header class="bar">
    <div><h1>${station.name}</h1><span style=${{opacity:.75}}>Division ${station.division} · ${user.username}, ${user.role}, rota ${user.rota}</span></div>
    <div class="row">
-    ${onDuty?html`<span class="duty">ON DUTY · EDITING OPEN</span>`:html`<span style=${{opacity:.8}}>Off duty (rota ${duty} is on) · view only</span>`}
-    <button onClick=${()=>setUid(null)}>Switch user</button>
+    ${onDuty?html`<span class="duty">ON DUTY · EDITING OPEN</span>`:html`<span style=${{opacity:.8}}>Off duty (rota ${db.dutyRota} is on) · view only</span>`}
+    <button onClick=${logout}>Log out</button>
    </div>
   </header>
   <main class="wrap">
-   <div class="panel row" style=${{padding:'8px 14px'}}>
-    <span class="mute">Demo: duty rota today</span>
-    <select style=${{width:'auto'}} aria-label="Duty rota today" value=${duty} onChange=${e=>setDuty(+e.target.value)}>
-     ${[1,2,3].map(r=>html`<option key=${r} value=${r}>Rota ${r}</option>`)}
-    </select>
-   </div>
    <div class="tabs" role="tablist">
     ${tabs.map(([k,t])=>html`<button key=${k} role="tab" aria-selected=${tab===k} onClick=${()=>setTab(k)}>${t}</button>`)}
    </div>
@@ -81,7 +57,7 @@ function App(){
 const Lock=()=>html`<div class="lock">Editing is open only on your rota’s duty day. You can still view everything.</div>`;
 const Pill=({s})=>html`<span class=${'pill '+s}>${lbl(s)}</span>`;
 
-function Armoury({db,up,user,station,onDuty,notify}){
+function Armoury({db,run,user,station,onDuty}){
  const apps=db.appliances.filter(a=>a.station_id===station.id);
  const [cs,setCs]=useState(apps[0]?.callsign);
  const [res,setRes]=useState({});
@@ -89,15 +65,8 @@ function Armoury({db,up,user,station,onDuty,notify}){
  const items=db.checklist.filter(c=>c.appliance===cs);
  const eq=db.equipment.filter(e=>e.appliance===cs);
  const submit=()=>{
-  up(d=>{
-   const id=d.hoto.length+1;
-   d.hoto.push({id,appliance:cs,rota:user.rota,completed_by:user.user_id,completed_at:now()});
-   items.forEach(it=>{
-    d.results.push({id:d.results.length+1,record_id:id,item_id:it.id,result:res[it.id]||'OK',note:notes[it.id]||''});
-   });
-   return d;
-  });
-  setRes({});setNotes({});notify('HOTO saved for '+cs);
+  run(()=>api('/api/hoto','POST',{appliance:cs,results:items.map(it=>({item_id:it.id,result:res[it.id]||'OK',note:notes[it.id]||''}))}),'HOTO saved for '+cs);
+  setRes({});setNotes({});
  };
  const last=[...db.hoto].reverse().find(h=>h.appliance===cs);
  if(!apps.length) return html`<div class="panel">No appliances registered at this station yet.</div>`;
@@ -130,7 +99,7 @@ function Armoury({db,up,user,station,onDuty,notify}){
  </div>`;
 }
 
-function Tracker({db,up,user,station,onDuty,notify}){
+function Tracker({db,run,user,station,onDuty}){
  const [q,setQ]=useState('');
  const [f,setF]=useState('ALL');
  const eq=db.equipment.filter(e=>e.station_id===station.id)
@@ -138,15 +107,8 @@ function Tracker({db,up,user,station,onDuty,notify}){
   .filter(e=>(e.name+' '+(e.serial_number||'')).toLowerCase().includes(q.toLowerCase()));
  const names=Object.fromEntries(db.users.map(u=>[u.user_id,u.username]));
  const change=(e,to)=>{
-  if(to==='ON_APPLIANCE'&&!db.appliances.some(a=>a.station_id===station.id)) return;
-  const app=to==='ON_APPLIANCE'?(e.appliance||db.appliances.find(a=>a.station_id===station.id).callsign):null;
   const note=prompt('Add a note for this change (optional)')||'';
-  up(d=>{
-   const x=d.equipment.find(i=>i.equipment_id===e.equipment_id);
-   d.log.push({id:d.log.length+1,equipment_id:x.equipment_id,from_status:x.status,to_status:to,changed_by:user.user_id,changed_at:now(),note});
-   x.status=to;x.appliance=app;return d;
-  });
-  notify(e.name+' set to '+lbl(to));
+  run(()=>api('/api/equipment/'+e.equipment_id+'/status','POST',{to_status:to,note}),e.name+' set to '+lbl(to));
  };
  const log=db.log.filter(l=>db.equipment.find(e=>e.equipment_id===l.equipment_id)?.station_id===station.id).slice().reverse();
  return html`<div>
@@ -179,19 +141,14 @@ function Tracker({db,up,user,station,onDuty,notify}){
  </div>`;
 }
 
-function Service({db,up,user,station,onDuty,notify}){
+function Service({db,run,user,station}){
  const eq=db.equipment.filter(e=>e.station_id===station.id&&e.status!=='SERVICING');
  const [id,setId]=useState('');
  const [fault,setFault]=useState('');
  const mine=db.service.filter(s=>db.equipment.find(e=>e.equipment_id===s.equipment_id)?.station_id===station.id);
  const send=()=>{
-  up(d=>{
-   const x=d.equipment.find(e=>e.equipment_id===+id);
-   d.service.push({id:d.service.length+1,equipment_id:x.equipment_id,requested_by:user.user_id,fault_description:fault,status:'SUBMITTED',submitted_at:now()});
-   d.log.push({id:d.log.length+1,equipment_id:x.equipment_id,from_status:x.status,to_status:'SERVICING',changed_by:user.user_id,changed_at:now(),note:'Service request: '+fault});
-   x.status='SERVICING';x.appliance=null;return d;
-  });
-  setId('');setFault('');notify('Service request submitted');
+  run(()=>api('/api/service','POST',{equipment_id:+id,fault_description:fault.trim()}),'Service request submitted')
+   .then(ok=>{if(ok){setId('');setFault('')}});
  };
  return html`<div>
   <div class="panel">
@@ -212,24 +169,17 @@ function Service({db,up,user,station,onDuty,notify}){
  </div>`;
 }
 
-function Init({db,up,user,station,notify}){
+function Init({db,run,station}){
  const blank={serial:'',name:'',status:'STORE',appliance:'',notes:''};
  const [f,setF]=useState(blank);
  const [err,setErr]=useState('');
  const apps=db.appliances.filter(a=>a.station_id===station.id);
  const set=k=>e=>setF({...f,[k]:e.target.value});
  const add=()=>{
-  const sn=f.serial.trim();
-  if(sn&&db.equipment.some(e=>e.serial_number===sn)){setErr('Serial number '+sn+' is already registered.');return}
   if(f.status==='ON_APPLIANCE'&&!f.appliance){setErr('Choose which appliance this item is on.');return}
   setErr('');
-  up(d=>{
-   const id=Math.max(0,...d.equipment.map(e=>e.equipment_id))+1;
-   d.equipment.push({equipment_id:id,serial_number:sn||null,name:f.name.trim(),station_id:station.id,appliance:f.status==='ON_APPLIANCE'?f.appliance:null,status:f.status,notes:f.notes});
-   d.log.push({id:d.log.length+1,equipment_id:id,from_status:null,to_status:f.status,changed_by:user.user_id,changed_at:now(),note:'Initialised'});
-   return d;
-  });
-  setF(blank);notify('Equipment added to '+station.name);
+  run(()=>api('/api/equipment','POST',{serial_number:f.serial.trim()||null,name:f.name.trim(),status:f.status,appliance:f.status==='ON_APPLIANCE'?f.appliance:null,notes:f.notes}),'Equipment added to '+station.name)
+   .then(ok=>{if(ok)setF(blank)});
  };
  return html`<div class="panel">
   <h2>Add equipment to ${station.name}</h2>
