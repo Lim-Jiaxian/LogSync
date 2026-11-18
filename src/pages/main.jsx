@@ -1,10 +1,13 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from '../App.js';
+import { createRoot } from 'react-dom/client';
+import Login from './login.jsx';
+import App from '../../js/App.js';
 import '../styles.css';
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+const Page = window.location.pathname === '/home' ? App : Login;
+
+createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <Page />
   </React.StrictMode>
 );

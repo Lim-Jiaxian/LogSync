@@ -1,7 +1,7 @@
 
 import React from "react";
-import Login from "./pages/login";
-import Home from "./pages/home";
+import Login from "./login";
+// import Home from "./pages/home";
 
 function App() {
   const currentPage = window.location.pathname;

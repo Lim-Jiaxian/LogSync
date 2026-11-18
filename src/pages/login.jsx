@@ -50,7 +50,7 @@ export default function Login() {
 
       console.log("Logged-in user:", data.user);
 
-      // Redirect to Home.jsx
+      // Redirect to the app route, which renders js/App.js.
       window.location.href = "/home";
 
     } catch (error) {
@@ -174,7 +174,7 @@ export default function Login() {
   );
 }
 
-// CSS Styles
+// CSS Styles (uses the same variables as styles.css, so dark mode works too)
 const styles = {
   page: {
     minHeight: "100vh",
@@ -182,8 +182,9 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     padding: "20px",
-    background: "#f3f6fc",
-    fontFamily: "Arial, sans-serif",
+    background: "var(--bg)",
+    color: "var(--ink)",
+    fontFamily: "Barlow, system-ui, sans-serif",
     boxSizing: "border-box",
   },
 
@@ -191,9 +192,10 @@ const styles = {
     width: "100%",
     maxWidth: "420px",
     padding: "40px",
-    background: "#ffffff",
-    borderRadius: "14px",
-    boxShadow: "0 8px 35px rgba(0,0,0,0.07)",
+    background: "var(--surface)",
+    border: "1px solid var(--line)",
+    borderTop: "4px solid var(--red)",
+    borderRadius: "4px",
     boxSizing: "border-box",
   },
 
@@ -202,16 +204,19 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     gap: "10px",
-    marginBottom: "35px",
-    color: "#2457d6",
+    marginBottom: "30px",
+    color: "var(--ink)",
+    fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
+    fontSize: "22px",
+    fontWeight: 700,
   },
 
   logoIcon: {
     width: "38px",
     height: "38px",
-    background: "#2457d6",
+    background: "var(--red)",
     color: "#ffffff",
-    borderRadius: "9px",
+    borderRadius: "4px",
     display: "grid",
     placeItems: "center",
     fontSize: "23px",
@@ -225,13 +230,15 @@ const styles = {
 
   title: {
     margin: "0 0 8px",
-    color: "#17233c",
-    fontSize: "26px",
+    color: "var(--ink)",
+    fontFamily: "'Barlow Condensed', 'Arial Narrow', sans-serif",
+    fontSize: "30px",
+    fontWeight: 700,
   },
 
   description: {
     margin: 0,
-    color: "#7b8496",
+    color: "var(--mute)",
     fontSize: "14px",
     lineHeight: 1.5,
   },
@@ -243,43 +250,48 @@ const styles = {
   },
 
   label: {
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "600",
-    color: "#303b50",
+    color: "var(--ink)",
   },
 
   input: {
     width: "100%",
-    padding: "13px",
-    border: "1px solid #dce2ed",
-    borderRadius: "7px",
-    fontSize: "14px",
+    padding: "10px 12px",
+    border: "1px solid var(--line)",
+    background: "var(--surface)",
+    color: "var(--ink)",
+    borderRadius: "4px",
+    fontSize: "15px",
+    fontFamily: "inherit",
     boxSizing: "border-box",
-    outline: "none",
     marginBottom: "8px",
+    // no outline:none, so the yellow keyboard focus ring still shows
   },
 
   passwordWrapper: {
     display: "flex",
-    border: "1px solid #dce2ed",
-    borderRadius: "7px",
+    border: "1px solid var(--line)",
+    background: "var(--surface)",
+    borderRadius: "4px",
     marginBottom: "8px",
   },
 
   passwordInput: {
     flex: 1,
     minWidth: 0,
-    padding: "13px",
+    padding: "10px 12px",
     border: "none",
-    outline: "none",
-    fontSize: "14px",
+    fontSize: "15px",
+    fontFamily: "inherit",
+    color: "var(--ink)",
     background: "transparent",
   },
 
   showButton: {
     border: "none",
     background: "transparent",
-    color: "#2457d6",
+    color: "var(--red)",
     padding: "0 12px",
     cursor: "pointer",
     fontWeight: "600",
@@ -289,7 +301,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    fontSize: "12px",
+    fontSize: "13px",
     margin: "5px 0 12px",
     flexWrap: "wrap",
     gap: "10px",
@@ -299,32 +311,31 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "6px",
-    color: "#596579",
+    color: "var(--mute)",
   },
 
   link: {
-    color: "#2457d6",
+    color: "var(--red)",
     textDecoration: "none",
   },
 
   error: {
-    padding: "11px",
-    background: "#fff0f0",
-    border: "1px solid #ffd1d1",
-    borderRadius: "7px",
-    color: "#c62828",
+    padding: "10px 12px",
+    background: "var(--bg)",
+    borderLeft: "4px solid var(--bad)",
+    color: "var(--bad)",
     fontSize: "13px",
   },
 
   loginButton: {
     width: "100%",
-    padding: "14px",
-    background: "#2457d6",
+    padding: "12px",
+    background: "var(--red)",
     color: "#ffffff",
-    border: "none",
-    borderRadius: "7px",
+    border: "1px solid var(--red)",
+    borderRadius: "4px",
     fontSize: "15px",
-    fontWeight: "bold",
+    fontWeight: "600",
     cursor: "pointer",
     marginTop: "5px",
   },
@@ -332,9 +343,9 @@ const styles = {
   footer: {
     textAlign: "center",
     fontSize: "12px",
-    color: "#9aa3b2",
+    color: "var(--mute)",
     marginTop: "30px",
-    borderTop: "1px solid #edf0f5",
+    borderTop: "1px solid var(--line)",
     paddingTop: "18px",
   },
 };
