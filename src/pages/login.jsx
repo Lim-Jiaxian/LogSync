@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 
 export default function Login() {
+
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [username, setUsername] = useState("");
@@ -29,12 +30,15 @@ export default function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Login failed.");
-        return;
-      }
-
+  setError("Invalid username and/or password.");
+  return;
+}
       // Save logged-in user details
       const userData = JSON.stringify(data.user);
+
+      // Clear previous login data
+      localStorage.removeItem("logsyncUser");
+      sessionStorage.removeItem("logsyncUser");
 
       if (remember) {
         localStorage.setItem("logsyncUser", userData);
@@ -46,12 +50,14 @@ export default function Login() {
 
       console.log("Logged-in user:", data.user);
 
-      // Redirect to home page
-      window.location.href = "/";
+      // Redirect to Home.jsx
+      window.location.href = "/home";
 
     } catch (error) {
       console.error("Login error:", error);
-      setError("Cannot connect to the server. Please check if the backend is running.");
+      setError(
+        "Cannot connect to the server. Please check if the backend is running."
+      );
     } finally {
       setLoading(false);
     }
@@ -106,7 +112,7 @@ export default function Login() {
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Leave blank if account has no password"
+              placeholder="Enter password"
               autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
