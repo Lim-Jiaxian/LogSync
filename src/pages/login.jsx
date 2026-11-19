@@ -1,79 +1,66 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getToken, setToken } from "../../js/api.js";
+import { isStandalone } from "../pwa.js";
+import { InstallButton, IosInstallHint, UpdateBanner } from "../PwaUI.jsx";
 
 export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
+  // In the installed app, staying signed in is the expected behaviour (closing it clears sessionStorage).
+  const [remember, setRemember] = useState(isStandalone);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Already signed in (e.g. reopening the installed app with "Remember me"): go straight in.
+  // An expired token is cleared by the app's first 401, which sends the user back here.
+  useEffect(() => {
+    if (getToken()) window.location.replace("/home");
+  }, []);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
     setLoading(true);
 
+    let response;
     try {
-      const response = await fetch("http://localhost:3000/api/login", {
+      response = await fetch("/api/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, remember }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-  setError("Invalid username and/or password.");
-  return;
-}
-      // Save logged-in user details
-      const userData = JSON.stringify(data.user);
-
-      // Clear previous login data
-      localStorage.removeItem("logsyncUser");
-      sessionStorage.removeItem("logsyncUser");
-
-      // The server's session token. js/api.js reads it from sessionStorage.
-      sessionStorage.setItem("token", data.token);
-
-      if (remember) {
-        localStorage.setItem("logsyncUser", userData);
-      } else {
-        sessionStorage.setItem("logsyncUser", userData);
-      }
-
-      // alert(`Welcome, ${data.user.username}!`);
-
-      console.log("Logged-in user:", data.user);
-
-      // Redirect to the app route, which renders js/App.js.
-      window.location.href = "/home";
-
     } catch (error) {
       console.error("Login error:", error);
-      setError(
-        "Cannot connect to the server. Please check if the backend is running."
-      );
-    } finally {
+      setError("Cannot connect to the server. Please check your connection and try again.");
       setLoading(false);
+      return;
     }
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.token) {
+      setError(data.message || "Something went wrong. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    // js/api.js reads the token from storage. "Remember me" keeps it after the app is closed.
+    setToken(data.token, remember);
+    window.location.replace("/home");
   }
 
   return (
+    <div className="page-top">
+    <UpdateBanner />
     <main style={styles.page}>
       <section style={styles.card}>
 
         {/* Logo */}
         <div style={styles.logo}>
-          <div style={styles.logoIcon}>L</div>
-          <h2>LogSync</h2>
+          <img src="/favicon.svg" alt="" width="40" height="40" />
+          <h2 style={{ margin: 0 }}>LogSync</h2>
         </div>
 
         {/* Heading */}
@@ -119,6 +106,7 @@ export default function Login() {
               autoComplete="current-password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
+              required
             />
 
             <button
@@ -167,24 +155,31 @@ export default function Login() {
 
         </form>
 
+        {/* Install the app (shown only where the browser supports it) */}
+        <div style={styles.install}>
+          <InstallButton className="install-btn" />
+          <IosInstallHint />
+        </div>
+
         {/* Footer */}
         <div style={styles.footer}>
-          <p>LogSync - Equipment Management System</p>
+          <p style={{ margin: 0 }}>LogSync - Equipment Management System</p>
         </div>
 
       </section>
     </main>
+    </div>
   );
 }
 
 // CSS Styles (uses the same variables as styles.css, so dark mode works too)
 const styles = {
   page: {
-    minHeight: "100vh",
+    minHeight: "calc(100dvh - env(safe-area-inset-top, 0px))",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: "20px",
+    padding: "20px max(16px, env(safe-area-inset-right, 0px)) 20px max(16px, env(safe-area-inset-left, 0px))",
     background: "var(--bg)",
     color: "var(--ink)",
     fontFamily: "Barlow, system-ui, sans-serif",
@@ -194,7 +189,7 @@ const styles = {
   card: {
     width: "100%",
     maxWidth: "420px",
-    padding: "40px",
+    padding: "clamp(24px, 7vw, 40px)",
     background: "var(--surface)",
     border: "1px solid var(--line)",
     borderTop: "4px solid var(--red)",
@@ -214,17 +209,6 @@ const styles = {
     fontWeight: 700,
   },
 
-  logoIcon: {
-    width: "38px",
-    height: "38px",
-    background: "var(--red)",
-    color: "#ffffff",
-    borderRadius: "4px",
-    display: "grid",
-    placeItems: "center",
-    fontSize: "23px",
-    fontWeight: "bold",
-  },
 
   heading: {
     textAlign: "center",
@@ -341,6 +325,13 @@ const styles = {
     fontWeight: "600",
     cursor: "pointer",
     marginTop: "5px",
+  },
+
+  install: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    marginTop: "18px",
   },
 
   footer: {

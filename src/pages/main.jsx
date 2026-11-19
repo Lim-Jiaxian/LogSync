@@ -1,3 +1,4 @@
+import '../pwa.js'; // first: registers the service worker and catches the install prompt
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import Login from './login.jsx';

@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local PGlite database (npm run server without DATABASE_URL)
+db/pglite/

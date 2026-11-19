@@ -4,10 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>LogSync</title>
+<meta name="description" content="Handover checklists, equipment status and servicing requests for every rota at the station.">
+<meta name="theme-color" content="#14212b">
+<meta name="color-scheme" content="light dark">
+<!-- Installed app chrome (iOS reads these; others use the web manifest) -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="LogSync">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- the web manifest link is injected at build time by vite-plugin-pwa -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
 </head>
 <body>
 <div id="root"></div>
+<noscript>LogSync needs JavaScript to run.</noscript>
 <script type="module" src="/src/pages/main.jsx"></script>
 </body>
 </html>
