@@ -4,7 +4,7 @@
 -- Plaintext passwords below are replaced with bcrypt hashes on each user's first login.
 --
 -- * Wipes all appliances, equipment, checklists, logs, checks and service requests.
--- * Keeps existing users with user_id < 100; replaces demo users (user_id >= 100).
+-- * Keeps existing users with user_id < 100 (adds the project team if missing); replaces demo users (user_id >= 100).
 -- * DEMO DATA: demo people, passwords and serial numbers are fictional.
 --
 -- The PL armoury is defined ONCE (temp table pl_armoury) and copied to every PL.
@@ -66,6 +66,18 @@ INSERT INTO users (user_id, station_id, username, password, role, rota) VALUES
   (135, 34, 'Vikram Singh',    'demo1234', 'SC', 2),
   (136, 34, 'Gabriel Sim',     'demo1234', 'SC', 3),
   (137, 34, 'Nur Aisyah',      'demo1234', 'IC', 1);
+
+-- ------------------------------------------------------------------ project team
+-- The team's own prototype accounts (Sengkang). Added only if missing, so a reset never
+-- changes a password someone has already used. Password for all: demo1234
+INSERT INTO users (user_id, station_id, username, password, role, rota) VALUES
+  (1, 33, 'Akshay Sivaraman', 'demo1234', 'FF', 2),
+  (2, 33, 'Gavin Yip',        'demo1234', 'FF', 2),
+  (3, 33, 'Kian Hong',        'demo1234', 'SC', 2),
+  (4, 33, 'Micheal Ian',      'demo1234', 'SC', 3),
+  (5, 33, 'Irfan Affandy',    'demo1234', 'IC', 2),
+  (6, 33, 'Tristen',          'demo1234', 'FF', 1)
+ON CONFLICT DO NOTHING;
 
 -- ------------------------------------------------------------------ PL armoury
 -- Order of rows = order on the checklist. kit NULL = standalone item.
