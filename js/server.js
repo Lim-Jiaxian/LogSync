@@ -167,6 +167,29 @@ app.get(
   }),
 );
 
+/* ---------- demo sign-in on the login page (DEMO_LOGINS=false hides it) ---------- */
+// Picked fresh on every request, so the list follows the duty rota: today's SC and FF can
+// edit, the IC can register equipment, and an off-duty FF shows the read-only view.
+const DEMO_STATION = 33; // Sengkang
+const DEMO_PASSWORD = "demo1234"; // set for every demo account in db/seed.sql
+app.get(
+  "/api/demo-accounts",
+  h(async (req, res) => {
+    res.set("Cache-Control", "no-store");
+    if (process.env.DEMO_LOGINS === "false") return res.json({ accounts: [] });
+    const rota = dutyRota();
+    const [station, users] = await Promise.all([
+      row(db, "SELECT name FROM stations WHERE id = $1", [DEMO_STATION]),
+      rows(db, "SELECT username, role, rota FROM users WHERE user_id >= 100 AND station_id = $1 ORDER BY user_id", [DEMO_STATION]),
+    ]);
+    const pick = (role, onDuty) => users.find((u) => u.role === role && (onDuty == null || (u.rota === rota) === onDuty));
+    const accounts = [pick("SC", true), pick("FF", true), pick("IC"), pick("FF", false)]
+      .filter(Boolean)
+      .map((u) => ({ username: u.username, role: u.role, onDuty: u.rota === rota }));
+    res.json({ station: station?.name ?? null, dutyRota: rota, password: DEMO_PASSWORD, accounts });
+  }),
+);
+
 /* ---------- login / logout ---------- */
 const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", 10);
 const isBcrypt = (s) => /^\$2[aby]\$\d{2}\$/.test(s);

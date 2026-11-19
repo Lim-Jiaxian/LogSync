@@ -28,6 +28,7 @@ The app runs as one service (`railway.json`) next to a Railway Postgres:
 | --- | --- |
 | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` (required; the server refuses to start on Railway without it) |
 | `SEED_DEMO` | `false` to stop demo data loading into an empty database |
+| `DEMO_LOGINS` | `false` to hide the one-tap demo accounts on the login page |
 
 The health check is `GET /api/health`, which also checks the database connection.
 

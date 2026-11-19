@@ -11,6 +11,7 @@ export default function Login() {
   const [remember, setRemember] = useState(isStandalone);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  // false, true (the form), or the username of the demo account being signed in
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,17 +21,17 @@ export default function Login() {
     if (getToken()) window.location.replace("/home");
   }, []);
 
-  async function handleSubmit(event) {
-    event.preventDefault();
+  async function signIn(name, pass, busyAs = true) {
+    if (loading) return;
     setError("");
-    setLoading(true);
+    setLoading(busyAs);
 
     let response;
     try {
       response = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, remember }),
+        body: JSON.stringify({ username: name, password: pass, remember }),
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -49,6 +50,11 @@ export default function Login() {
     // js/api.js reads the token from storage. "Remember me" keeps it after the app is closed.
     setToken(data.token, remember);
     window.location.replace("/home");
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    signIn(username, password);
   }
 
   return (
@@ -148,12 +154,15 @@ export default function Login() {
               ...styles.loginButton,
               opacity: loading ? 0.7 : 1,
             }}
-            disabled={loading}
+            disabled={!!loading}
           >
-            {loading ? "Signing In..." : "Sign In"}
+            {loading === true ? "Signing In..." : "Sign In"}
           </button>
 
         </form>
+
+        {/* One-tap demo accounts (hidden if the server has them switched off, or is unreachable) */}
+        <DemoAccounts busy={loading} onPick={(name, pass) => signIn(name, pass, name)} />
 
         {/* Install the app (shown only where the browser supports it) */}
         <div style={styles.install}>
@@ -169,6 +178,79 @@ export default function Login() {
       </section>
     </main>
     </div>
+  );
+}
+
+/* ---------- demo accounts ---------- */
+const ROLE_NAMES = { SC: "Station Commander", FF: "Firefighter", IC: "Logistics IC" };
+
+// What each account can do today (mirrors the checks in js/server.js).
+function canDo({ role, onDuty }) {
+  if (role === "IC")
+    return onDuty
+      ? "Everything a Station Commander can do, plus registering new equipment."
+      : "Registers new equipment. Not on duty today, so other changes are locked.";
+  if (!onDuty) return "View only: their rota isn’t on duty today.";
+  return role === "SC"
+    ? "HOTO checks, equipment moves and service requests."
+    : "HOTO checks and equipment moves.";
+}
+
+const initials = (name) =>
+  name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join("");
+
+function DemoAccounts({ busy, onPick }) {
+  const [demo, setDemo] = useState(null);
+
+  useEffect(() => {
+    let live = true;
+    fetch("/api/demo-accounts")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => live && d?.accounts?.length && setDemo(d))
+      .catch(() => {}); // offline or switched off: just don't show the list
+    return () => { live = false; };
+  }, []);
+
+  if (!demo) return null;
+
+  return (
+    <section className="demo" aria-labelledby="demo-title">
+      <h2 className="demo-or" id="demo-title">Or try a demo account</h2>
+
+      <div className="demo-list">
+        {demo.accounts.map((a) => {
+          const role = ROLE_NAMES[a.role] || a.role;
+          const signingIn = busy === a.username;
+          return (
+            <button
+              key={a.username}
+              type="button"
+              className={"demo-acct" + (a.onDuty ? " on" : "")}
+              disabled={!!busy}
+              aria-busy={signingIn}
+              aria-label={`Sign in as ${a.username}, ${role}, ${a.onDuty ? "on duty" : "off duty"}`}
+              onClick={() => onPick(a.username, demo.password)}
+            >
+              <span className={"demo-av " + a.role} aria-hidden="true">{initials(a.username)}</span>
+              <span className="demo-who">
+                <span className="demo-name">{a.username}</span>
+                <span className="demo-role">{role}</span>
+              </span>
+              <span className={"demo-tag" + (a.onDuty ? " on" : "")}>
+                {signingIn ? "Signing in…" : a.onDuty ? "On duty" : "Off duty"}
+              </span>
+              <span className="demo-desc">{canDo(a)}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <p className="demo-note">
+        {demo.station && <>{demo.station} Fire Station · </>}Rota {demo.dutyRota} on duty today
+        <br />
+        Password for every demo account: <code>{demo.password}</code>
+      </p>
+    </section>
   );
 }
 

@@ -103,3 +103,27 @@ td.flag select{border-color:var(--bad);color:var(--bad);font-weight:600}
 /* login page install button */
 .install-btn{width:100%;padding:11px;border:1px solid var(--line);background:var(--surface);font-weight:600;color:var(--ink)}
 .install-btn:hover{border-color:var(--mute)}
+
+/* login page: one-tap demo accounts */
+.demo{margin-top:26px}
+.demo-or{display:flex;align-items:center;gap:12px;margin:0 0 12px;font:600 12px/1 Barlow,system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.demo-or::before,.demo-or::after{content:"";flex:1;border-top:1px solid var(--line)}
+.demo-list{display:grid;gap:8px}
+.demo-acct{display:grid;grid-template-columns:36px minmax(0,1fr) auto;grid-template-areas:"av who tag" "av desc desc";gap:3px 12px;align-items:center;width:100%;padding:10px 12px;text-align:left;font-weight:400;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:4px;background:var(--surface);transition:background-color .15s,border-color .15s}
+.demo-acct.on{border-left-color:var(--duty)}
+.demo-acct:hover:not(:disabled){background:var(--bg);border-top-color:var(--mute);border-right-color:var(--mute);border-bottom-color:var(--mute)}
+.demo-acct[aria-busy=true]:disabled{opacity:1}
+.demo-av{grid-area:av;align-self:start;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:700 15px/1 'Barlow Condensed',sans-serif;letter-spacing:.03em;color:#fff;background:#3d5466}
+.demo-av.SC{background:#c8102e}.demo-av.IC{background:#1f7a4d}
+.demo-who{grid-area:who;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;min-width:0}
+.demo-name{font-weight:600;color:var(--ink)}
+.demo-role{font-size:12px;font-weight:600;color:var(--mute)}
+.demo-tag{grid-area:tag;justify-self:end;padding:4px 7px 3px;border:1px solid var(--line);border-radius:3px;font:700 12px/1 'Barlow Condensed',sans-serif;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;color:var(--mute)}
+.demo-tag.on{background:var(--duty);border-color:var(--duty);color:var(--dutyink)}
+.demo-desc{grid-area:desc;font-size:13px;line-height:1.35;color:var(--mute)}
+@media (max-width:360px){
+  .demo-acct{grid-template-columns:36px minmax(0,1fr);grid-template-areas:"av who" "av tag" "av desc"}
+  .demo-tag{justify-self:start;margin:2px 0}
+}
+.demo-note{margin:12px 0 0;text-align:center;font-size:12px;line-height:1.7;color:var(--mute)}
+.demo-note code{padding:1px 5px;border:1px solid var(--line);border-radius:3px;background:var(--bg);color:var(--ink);font:600 12px ui-monospace,Consolas,monospace}
